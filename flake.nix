@@ -15,6 +15,7 @@
         # test-only: a jail whose exe is `env`, so `.#jail-test -- cat FILE`
         # runs `env cat FILE` inside the jail and proves host files are hidden.
         jail-test = mkJailed { browser = pkgs.coreutils; name = "keyfarm-jail-test"; exe = "env"; };
+        pw = pkgs.callPackage ./nix/pw.nix { };
       in {
         devShells.default = pkgs.mkShell {
           packages = [ pkgs.nodejs_22 pkgs.chromium pkgs.bubblewrap ];
@@ -23,6 +24,7 @@
           '';
         };
         packages.keyfarm-chromium = keyfarm-chromium;
+        packages.pw = pw;
         apps.jail-test = { type = "app"; program = "${jail-test}/bin/keyfarm-jail-test"; };
       });
 }
