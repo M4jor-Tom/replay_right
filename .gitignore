@@ -1,0 +1,7 @@
+result
+result-*
+node_modules/
+.direnv/
+cookies/
+*.profile/
+.superpowers/
