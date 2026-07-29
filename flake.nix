@@ -8,7 +8,13 @@
 
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (system:
-      let pkgs = import nixpkgs { inherit system; };
+      let
+        pkgs = import nixpkgs { inherit system; };
+        mkJailed = pkgs.callPackage ./nix/jail.nix { };
+        keyfarm-chromium = mkJailed { browser = pkgs.chromium; };
+        # test-only: a jail whose exe is `env`, so `.#jail-test -- cat FILE`
+        # runs `env cat FILE` inside the jail and proves host files are hidden.
+        jail-test = mkJailed { browser = pkgs.coreutils; name = "keyfarm-jail-test"; exe = "env"; };
       in {
         devShells.default = pkgs.mkShell {
           packages = [ pkgs.nodejs_22 pkgs.chromium pkgs.bubblewrap ];
@@ -16,5 +22,7 @@
             [ -d pw/node_modules ] || (cd pw && npm ci)
           '';
         };
+        packages.keyfarm-chromium = keyfarm-chromium;
+        apps.jail-test = { type = "app"; program = "${jail-test}/bin/keyfarm-jail-test"; };
       });
 }
