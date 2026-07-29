@@ -16,6 +16,17 @@
         # runs `env cat FILE` inside the jail and proves host files are hidden.
         jail-test = mkJailed { browser = pkgs.coreutils; name = "keyfarm-jail-test"; exe = "env"; };
         pw = pkgs.callPackage ./nix/pw.nix { };
+        browser-app = pkgs.writeShellApplication {
+          name = "keyfarm-browser";
+          runtimeInputs = [ keyfarm-chromium ];
+          text = ''
+            : "''${1:?usage: keyfarm-browser <cookies-dir>}"
+            export KEYFARM_PROFILE="$1"; shift
+            extra=()
+            [ -n "''${KEYFARM_SMOKE:-}" ] && extra=(--headless=new --no-sandbox --disable-dev-shm-usage --dump-dom about:blank)
+            exec keyfarm-chromium --user-data-dir="$KEYFARM_PROFILE" "''${extra[@]}" "$@"
+          '';
+        };
       in {
         devShells.default = pkgs.mkShell {
           packages = [ pkgs.nodejs_22 pkgs.chromium pkgs.bubblewrap ];
@@ -26,5 +37,6 @@
         packages.keyfarm-chromium = keyfarm-chromium;
         packages.pw = pw;
         apps.jail-test = { type = "app"; program = "${jail-test}/bin/keyfarm-jail-test"; };
+        apps.browser = { type = "app"; program = "${browser-app}/bin/keyfarm-browser"; };
       });
 }
