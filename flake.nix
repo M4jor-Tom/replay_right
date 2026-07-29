@@ -49,5 +49,23 @@
         apps.jail-test = { type = "app"; program = "${jail-test}/bin/keyfarm-jail-test"; };
         apps.browser = { type = "app"; program = "${browser-app}/bin/keyfarm-browser"; };
         apps.run = { type = "app"; program = "${run-app}/bin/keyfarm-run"; };
-      });
+      })
+    // {
+      lib.mkApp = { pkgs, cookiesDir, script, browser ? pkgs.chromium, headless ? true }:
+        let
+          mkJailed = pkgs.callPackage ./nix/jail.nix { };
+          jailed = mkJailed { inherit browser; };
+          pw = pkgs.callPackage ./nix/pw.nix { };
+          app = pkgs.writeShellApplication {
+            name = "keyfarm-app";
+            runtimeInputs = [ pkgs.nodejs_22 jailed ];
+            text = ''
+              export KEYFARM_CHROMIUM="${jailed}/bin/keyfarm-chromium"
+              export KEYFARM_PROFILE="${cookiesDir}"
+              export KEYFARM_HEADLESS="${if headless then "1" else "0"}"
+              exec node --import ${pw}/lib/node_modules/tsx/dist/loader.mjs ${pw}/lib/runner.ts "${cookiesDir}" "${script}"
+            '';
+          };
+        in { type = "app"; program = "${app}/bin/keyfarm-app"; };
+    };
 }
