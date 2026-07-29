@@ -12,6 +12,8 @@ writeShellApplication {
     # keyfarm: display passthrough for headful farming (ro-bind-try/--setenv default
     # to empty/nonexistent so this is a no-op when no X11/Wayland display is present,
     # keeping the headless smoke test unaffected)
+    xauth="''${XAUTHORITY:-/nonexistent}"
+    wayland_sock="''${XDG_RUNTIME_DIR:-/nonexistent}/''${WAYLAND_DISPLAY:-nonexistent}"
     exec bwrap \
       --ro-bind /nix/store /nix/store \
       --ro-bind-try /etc/ssl /etc/ssl \
@@ -28,8 +30,8 @@ writeShellApplication {
       --setenv DISPLAY "''${DISPLAY:-}" \
       --setenv WAYLAND_DISPLAY "''${WAYLAND_DISPLAY:-}" \
       --setenv XAUTHORITY "''${XAUTHORITY:-}" \
-      --ro-bind-try "''${XAUTHORITY:-/nonexistent}" "''${XAUTHORITY:-/nonexistent}" \
-      --ro-bind-try "''${XDG_RUNTIME_DIR:-/nonexistent}/''${WAYLAND_DISPLAY:-nonexistent}" "''${XDG_RUNTIME_DIR:-/nonexistent}/''${WAYLAND_DISPLAY:-nonexistent}" \
+      --ro-bind-try "$xauth" "$xauth" \
+      --ro-bind-try "$wayland_sock" "$wayland_sock" \
       -- ${exe} "$@"
   '';
 }
