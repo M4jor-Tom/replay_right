@@ -20,6 +20,9 @@ keyfarm's **jailed, stealthed** browser.
 2. **Ensure a warm profile.** If the cookies dir has no session for the target
    site, tell the user to farm keys first: `nix run .#browser -- <cookies-dir>`,
    log in by hand, close it. Do NOT try to log in via automation (it burns stealth).
+   Note: in a downstream consumer flake, `apps.default` alone won't expose this —
+   the consumer flake must also re-export keyfarm's `browser` app (see
+   `templates/consumer-flake.nix`) for `nix run .#browser` to resolve.
 3. **Explore live.** With the jailed browser running, drive it (Playwright MCP
    over its CDP endpoint, or by iterating the script) to work out selectors and
    flow for each step. Prefer resilient locators (roles/text) over brittle CSS.

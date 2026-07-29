@@ -19,8 +19,12 @@ export async function runScript(cookiesDir: string, scriptPath: string): Promise
 }
 
 // CLI: runner.ts <cookies-dir> <script>
-const [, , cookiesDir, scriptPath] = process.argv;
-if (cookiesDir && scriptPath) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const [, , cookiesDir, scriptPath] = process.argv;
+  if (!cookiesDir || !scriptPath) {
+    console.error('usage: runner.ts <cookies-dir> <script>');
+    process.exit(1);
+  }
   runScript(cookiesDir, scriptPath).catch((e) => {
     console.error(e);
     process.exit(1);

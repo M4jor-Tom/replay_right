@@ -18,10 +18,12 @@
         pw = pkgs.callPackage ./nix/pw.nix { };
         browser-app = pkgs.writeShellApplication {
           name = "keyfarm-browser";
-          runtimeInputs = [ keyfarm-chromium ];
+          runtimeInputs = [ keyfarm-chromium pkgs.coreutils ];
           text = ''
             : "''${1:?usage: keyfarm-browser <cookies-dir>}"
-            export KEYFARM_PROFILE="$1"; shift
+            KEYFARM_PROFILE="$(realpath -m "$1")"
+            export KEYFARM_PROFILE
+            shift
             extra=()
             [ -n "''${KEYFARM_SMOKE:-}" ] && extra=(--headless=new --no-sandbox --disable-dev-shm-usage --dump-dom about:blank)
             exec keyfarm-chromium --user-data-dir="$KEYFARM_PROFILE" "''${extra[@]}" "$@"
@@ -29,11 +31,12 @@
         };
         run-app = pkgs.writeShellApplication {
           name = "keyfarm-run";
-          runtimeInputs = [ pkgs.nodejs_22 keyfarm-chromium ];
+          runtimeInputs = [ pkgs.nodejs_22 keyfarm-chromium pkgs.coreutils ];
           text = ''
             : "''${1:?usage: keyfarm-run <cookies-dir> <script.ts>}" "''${2:?usage: keyfarm-run <cookies-dir> <script.ts>}"
             export KEYFARM_CHROMIUM="${keyfarm-chromium}/bin/keyfarm-chromium"
-            export KEYFARM_PROFILE="$1"
+            KEYFARM_PROFILE="$(realpath -m "$1")"
+            export KEYFARM_PROFILE
             exec node --import ${pw}/lib/node_modules/tsx/dist/loader.mjs ${pw}/lib/runner.ts "$@"
           '';
         };
