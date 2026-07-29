@@ -33,6 +33,7 @@
           text = ''
             : "''${1:?usage: keyfarm-run <cookies-dir> <script.ts>}" "''${2:?usage: keyfarm-run <cookies-dir> <script.ts>}"
             export KEYFARM_CHROMIUM="${keyfarm-chromium}/bin/keyfarm-chromium"
+            export KEYFARM_PROFILE="$1"
             exec node --import ${pw}/lib/node_modules/tsx/dist/loader.mjs ${pw}/lib/runner.ts "$@"
           '';
         };
