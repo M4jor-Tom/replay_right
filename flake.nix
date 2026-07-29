@@ -27,6 +27,15 @@
             exec keyfarm-chromium --user-data-dir="$KEYFARM_PROFILE" "''${extra[@]}" "$@"
           '';
         };
+        run-app = pkgs.writeShellApplication {
+          name = "keyfarm-run";
+          runtimeInputs = [ pkgs.nodejs_22 keyfarm-chromium ];
+          text = ''
+            : "''${1:?usage: keyfarm-run <cookies-dir> <script.ts>}" "''${2:?usage: keyfarm-run <cookies-dir> <script.ts>}"
+            export KEYFARM_CHROMIUM="${keyfarm-chromium}/bin/keyfarm-chromium"
+            exec node --import ${pw}/lib/node_modules/tsx/dist/loader.mjs ${pw}/lib/runner.ts "$@"
+          '';
+        };
       in {
         devShells.default = pkgs.mkShell {
           packages = [ pkgs.nodejs_22 pkgs.chromium pkgs.bubblewrap ];
@@ -38,5 +47,6 @@
         packages.pw = pw;
         apps.jail-test = { type = "app"; program = "${jail-test}/bin/keyfarm-jail-test"; };
         apps.browser = { type = "app"; program = "${browser-app}/bin/keyfarm-browser"; };
+        apps.run = { type = "app"; program = "${run-app}/bin/keyfarm-run"; };
       });
 }
