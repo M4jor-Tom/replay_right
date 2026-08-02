@@ -8,6 +8,7 @@ The technical layer other (functional, website-specific) repos build on.
   keys**: log in by hand; the session persists in `<cookies-dir>`.
 - `nix run .#run -- <cookies-dir> <script.ts>` — jailed **headless** replay of a
   `run(page)` script. Deterministic, no AI.
+- `nix run .#spawn_consumer_repo -- <name>` — open the functional-command template in `$EDITOR`; on close, scaffold `./<name>` as a keyfarm consumer repo (git-initialized). Override the keyfarm ref with `KEYFARM_REF=`.
 - `nix develop` — dev shell (node, chromium, bubblewrap, patchright).
 
 ## Downstream use
