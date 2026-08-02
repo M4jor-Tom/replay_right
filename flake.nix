@@ -58,10 +58,7 @@
             # shellcheck disable=SC2086  # word-split is intentional (supports e.g. EDITOR="code --wait")
             ''${VISUAL:-''${EDITOR:-nano}} "$tmp"
 
-            if [ ! -s "$tmp" ] || [ "$(sha256sum < "$tmp")" = "$pristine" ]; then
-              echo "nothing written; no repo created" >&2
-              exit 1
-            fi
+            if [ ! -s "$tmp" ] || [ "$(sha256sum < "$tmp")" = "$pristine" ]; then echo "nothing written; no repo created" >&2; exit 1; fi
 
             mkdir -p "$dir/commands" "$dir/.claude/commands" "$dir/cookies"
             cp "$tmp" "$dir/commands/$name.md"
@@ -74,9 +71,7 @@
 
             git -C "$dir" init -q
             git -C "$dir" add -A
-            git -C "$dir" commit -q -m "chore: scaffold $name — keyfarm consumer
-
-            Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
+            git -C "$dir" commit -q -m "chore: scaffold $name — keyfarm consumer"
 
             echo "created $dir"
             echo "next: cd $name && nix run .#browser -- ./cookies   # farm keys (log in by hand)"
