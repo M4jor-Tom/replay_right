@@ -42,7 +42,7 @@
         };
         spawn-consumer-repo = pkgs.writeShellApplication {
           name = "keyfarm-spawn-consumer-repo";
-          runtimeInputs = [ pkgs.coreutils pkgs.git pkgs.nano ];
+          runtimeInputs = [ pkgs.coreutils pkgs.gnused pkgs.git pkgs.nano ];
           text = ''
             : "''${1:?usage: keyfarm-spawn-consumer-repo <name>}"
             name="$1"
