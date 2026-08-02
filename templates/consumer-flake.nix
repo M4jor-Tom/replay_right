@@ -1,9 +1,11 @@
 {
-  inputs.keyfarm.url = "github:you/keyfarm";
+  description = "@NAME@ — keyfarm consumer";
+  inputs.keyfarm.url = "@KEYFARM_REF@";
   inputs.nixpkgs.follows = "keyfarm/nixpkgs";
   outputs = { self, keyfarm, nixpkgs }:
-    let system = "x86_64-linux";
-        pkgs = nixpkgs.legacyPackages.${system};
+    let
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
     in {
       apps.${system} = {
         default = keyfarm.lib.mkApp {
@@ -11,7 +13,6 @@
           cookiesDir = "./cookies";
           script = ./task.ts;
         };
-        # re-export keyfarm's browser app so `nix run .#browser` resolves downstream
         browser = keyfarm.apps.${system}.browser;
       };
     };
