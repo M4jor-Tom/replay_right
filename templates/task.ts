@@ -1,4 +1,4 @@
-import type { Page } from 'patchright';
+import type { Page } from 'playwright-core';
 
 // keyfarm: this file is MAINTAINED BY THE AI to mirror ../commands/<functional>.md.
 // Each `// step N:` comment mirrors a numbered step in that functional command.

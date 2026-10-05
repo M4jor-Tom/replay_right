@@ -1,15 +1,13 @@
 # keyfarm
 
-Jailed, stealthed browser + AI-maintained Playwright scripts, as a Nix flake.
+Jailed, persistent Firefox + AI-maintained Playwright scripts, as a Nix flake.
 The technical layer other (functional, website-specific) repos build on.
 
 ## Apps
-- `nix run .#browser -- <cookies-dir>` — jailed **headful** Chromium for **farming
-  keys**: log in by hand; the session persists in `<cookies-dir>`.
-- `nix run .#run -- <cookies-dir> <script.ts>` — jailed **headless** replay of a
-  `run(page)` script. Deterministic, no AI.
+- `nix run .#browser -- <cookies-dir>` — jailed **headful** Firefox for manual login; its profile persists in `<cookies-dir>`.
+- `nix run .#run -- <cookies-dir> <script.ts>` — jailed **headless** Firefox replay of a `run(page)` script.
 - `nix run .#spawn_consumer_repo -- <name>` — open the functional-command template in `$VISUAL`/`$EDITOR`; on close, scaffold `./<name>` as a keyfarm consumer repo (git-initialized). Override the keyfarm ref with `KEYFARM_REF=`.
-- `nix develop` — dev shell (node, chromium, bubblewrap, patchright).
+- `nix develop` — Node 22, Playwright Core, the matching Playwright Firefox build, and bubblewrap.
 
 ## Downstream use
 Add keyfarm as a flake input and compose an app (see `templates/consumer-flake.nix`):
@@ -18,10 +16,7 @@ Copy `commands/keyfarm-maintain.md` into your `.claude/commands/` and write a
 functional command (`templates/functional-command.md`).
 
 ## Design notes
-- **Jail:** bubblewrap (fs/process isolation; network shared). Chromium `--no-sandbox`
-  inside — bwrap is the sandbox.
-- **Stealth:** patchright kills the automation tells. Browser is `pkgs.chromium`
-  (overridable, but **never Google Chrome**).
-- **Turnstile:** not LLM-solvable; the lever is a warm profile (`cf_clearance`,
-  bound to IP+UA+TLS, ~30 min) + patchright + a good IP. Datacenter IPs still get hit.
-- See `docs/superpowers/specs/2026-07-29-keyfarm-design.md`.
+- **Jail:** bubblewrap isolates filesystem/processes while sharing network. Firefox runs inside the same jail; its persistent profile is the only writable host path.
+- **Browser:** Nixpkgs' `playwright-driver` supplies Playwright Core and its matching patched Firefox binary. Stock Firefox is not protocol-compatible with Playwright's Firefox driver.
+- **Stealth:** Firefox is not stealth-patched. Use manual login and a warm profile; bot challenges may still occur. Turnstile is not solvable by clicking/vision, and no captcha-solving is included.
+- Close the manual browser before running automation; Firefox locks a profile to one process at a time.

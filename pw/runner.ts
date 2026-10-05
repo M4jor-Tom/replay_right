@@ -1,7 +1,7 @@
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { launchJailed, page } from './keyfarm.ts';
-import type { Page } from 'patchright';
+import type { Page } from 'playwright-core';
 
 export async function runScript(cookiesDir: string, scriptPath: string): Promise<void> {
   const mod = (await import(pathToFileURL(resolve(scriptPath)).href)) as {

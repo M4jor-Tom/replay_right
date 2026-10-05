@@ -1,7 +1,7 @@
 { bubblewrap, writeShellApplication, coreutils, lib }:
 
-# mkJailed { browser } -> writeShellApplication `keyfarm-chromium`
-{ browser, name ? "keyfarm-chromium", exe ? (lib.getExe browser) }:
+# mkJailed { browser } -> writeShellApplication `keyfarm-browser`
+{ browser, name ? "keyfarm-browser", exe ? (lib.getExe browser) }:
 writeShellApplication {
   inherit name;
   runtimeInputs = [ bubblewrap browser coreutils ];

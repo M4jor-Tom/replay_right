@@ -1,7 +1,7 @@
 # keyfarm — Design Spec
 
 **Date:** 2026-07-29
-**Status:** Approved for implementation planning
+**Status:** Historical; superseded on 2026-10-05 by the Firefox backend documented in the [README](../../../README.md#design-notes).
 
 ## 1. Purpose
 
