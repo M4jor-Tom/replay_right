@@ -33,20 +33,16 @@
         jail-test = mkJailed { browser = pkgs.coreutils; name = "keyfarm-jail-test"; exe = "env"; };
         browser-app = pkgs.writeShellApplication {
           name = "keyfarm-browser";
-          runtimeInputs = [ keyfarm-browser pkgs.coreutils ];
+          runtimeInputs = [ pkgs.nodejs_22 keyfarm-browser ];
           text = ''
-            : "''${1:?usage: keyfarm-browser <cookies-dir>}"
-            KEYFARM_PROFILE="$(realpath -m "$1")"
-            export KEYFARM_PROFILE
-            shift
-            exec keyfarm-browser -no-remote -profile "$KEYFARM_PROFILE" "$@"
+            export KEYFARM_BROWSER="${keyfarm-browser}/bin/keyfarm-browser"
+            exec node --experimental-strip-types ${pw}/lib/browser.ts "$@"
           '';
         };
         run-app = pkgs.writeShellApplication {
           name = "keyfarm-run";
-          runtimeInputs = [ pkgs.nodejs_22 keyfarm-browser pkgs.coreutils ];
+          runtimeInputs = [ pkgs.nodejs_22 keyfarm-browser ];
           text = ''
-            : "''${1:?usage: keyfarm-run <cookies-dir> <script.ts>}" "''${2:?usage: keyfarm-run <cookies-dir> <script.ts>}"
             export KEYFARM_BROWSER="${keyfarm-browser}/bin/keyfarm-browser"
             exec ${runnerCmd pw} "$@"
           '';
@@ -97,6 +93,12 @@
             export KEYFARM_BROWSER="${keyfarm-browser}/bin/keyfarm-browser"
           '';
         };
+        checks.browser-options = pkgs.runCommand "keyfarm-browser-options" {
+          nativeBuildInputs = [ pkgs.nodejs_22 ];
+        } ''
+          node --experimental-strip-types --test ${./pw}/browser.test.ts
+          touch "$out"
+        '';
         packages.keyfarm-browser = keyfarm-browser;
         packages.pw = pw;
         apps.jail-test = toApp jail-test "keyfarm-jail-test";
@@ -115,7 +117,7 @@
             text = ''
               export KEYFARM_BROWSER="${jailed}/bin/keyfarm-browser"
               export KEYFARM_HEADLESS="${if headless then "1" else "0"}"
-              exec ${runnerCmd pw} "${cookiesDir}" "${script}"
+              exec ${runnerCmd pw} "$@" "${cookiesDir}" "${script}"
             '';
           };
         in toApp app "keyfarm-app";

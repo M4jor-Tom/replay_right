@@ -1,10 +1,25 @@
 import { resolve } from 'node:path';
 import { firefox, type BrowserContext, type Page } from 'playwright-core';
+import { firefoxExecutable } from './browser.ts';
 
 export async function launchJailed(
   cookiesDir: string,
-  opts: { headless?: boolean } = {},
+  opts: { headless?: boolean; firefoxProfile?: string } = {},
 ): Promise<BrowserContext> {
+  if (opts.firefoxProfile) {
+    // Keep Playwright's injected user.js in a disposable directory, not the
+    // user's profile. Firefox receives the real profile only in its argv.
+    return firefox.launchPersistentContext('', {
+      channel: 'moz-firefox',
+      executablePath: firefoxExecutable(),
+      headless: opts.headless ?? true,
+      ignoreDefaultArgs: true,
+      args: [
+        '--remote-debugging-port=0', '--no-remote', '--profile', opts.firefoxProfile,
+        opts.headless === false ? '--foreground' : '--headless',
+      ],
+    });
+  }
   const executablePath = process.env.KEYFARM_BROWSER;
   if (!executablePath) throw new Error('KEYFARM_BROWSER env not set');
   // Playwright and bwrap --bind need an absolute profile path, so resolve
